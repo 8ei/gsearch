@@ -69,7 +69,7 @@ menu = {
 #########################################################
 @blueprint.route('/')
 def home():
-    return redirect('/%s/search' % package_name)
+    return redirect('/%s/gsearch' % package_name)
 
 
 @blueprint.route('/<sub>')
