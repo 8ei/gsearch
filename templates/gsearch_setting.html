@@ -12,24 +12,23 @@
         <!-- 일반 -->
         {{ macros.m_tab_content_start('일반', true) }}
         <form id="setting" name="setting">
-            {{ macros.setting_input_text('sjva_driveId', 'SJVA 임시 저장소 driveId', value=arg['sjva_driveId'], placeholder='', desc=['구글드라이브 공유 SJVA임시 저장소의 driveId값. (콤마로 구분) 최상위 폴더의 폴더ID와 같습니다.']) }}
-            {{ macros.setting_input_int('path_count', '경로검색 건수', value=arg['path_count'], max='100', placeholder='50', desc='최대 100건') }}
-            {{ macros.setting_input_text('plex_path', 'Plex 경로 변환 규칙', value=arg['plex_path'], placeholder='', desc=['\"[구글드라이브 경로]=[로컬 마운트 경로]\"형식으로 작성합니다. 예) 내 드라이브=mnt/gd']) }}
-            {{ macros.setting_input_text('win_path', 'Windows 경로 변환 규칙', value=arg['win_path'], placeholder='', desc=['\"[구글드라이브 경로]=[Windows 경로]\"형식으로 작성합니다.','예) \"공유용=t:\\공유용\" - \"공유용\" 이라는 공드가 윈도우에 "T:\\공유용"에 마운트 된 상태']) }}
+            {{ macros.setting_button([['global_setting_save_btn', '설정 저장']]) }}
             {{ macros.m_hr() }}
             {{ macros.info_text_go('instruction', '중요!!', desc=['[SJVA 임시 저장소 driveId]에 임시저장소의 드라이브 ID를 꼭 넣고 사용하세요.', '콤마로 구분해서 여러 개를 등록할 수 있으며 여기에 등록된 드라이브는 검색 결과에 나타나지 않습니다.', '임시 저장소의 데이터를 임의로 수정하거나 삭제하면 안되니 꼭 넣고 사용하세요.']) }}
             {{ macros.m_hr() }}
+            {{ macros.setting_input_text('sjva_driveId', 'SJVA 임시 저장소 driveId', value=arg['sjva_driveId'], placeholder='', desc=['구글드라이브 공유 SJVA임시 저장소의 driveId값. (콤마로 구분) 최상위 폴더의 폴더ID와 같습니다.']) }}
+            {{ macros.setting_input_int('path_count', '경로검색 건수', value=arg['path_count'], max='100', placeholder='50', desc='최대 100건') }}
+            {{ macros.setting_input_text('plex_path', 'Plex 경로 변환 규칙', value=arg['plex_path'], placeholder='팀 드라이브=mnt/gttt,내 드라이브=mnt/gddd', desc=['\"[구글드라이브 경로]=[로컬 마운트 경로]\"형식으로 작성합니다. 예) 내 드라이브=mnt/gd']) }}
+            {{ macros.setting_input_text('win_path', 'Windows 경로 변환 규칙', value=arg['win_path'], placeholder='팀 드라이브=T:\\팀 드라이브,내 드라이브=Q:', desc=['\"[구글드라이브 경로]=[Windows 경로]\"형식으로 작성합니다.','예) \"공유용=t:\\공유용\" - \"공유용\" 이라는 공드가 윈도우에 "T:\\공유용"에 마운트 된 상태']) }}
+            {{ macros.m_hr() }}
             {{ macros.info_text_go('instruction', '변환 규칙', desc=['단순 치환규칙으로 생각하면 쉽습니다.', '구글드라이브 경로는 플러그인에서 검색된 것을 기준으로 합니다.', '콤마로 구분하여 여러개를 등록할 수 있습니다.', '예시)' , 'Plex(linux) - 팀 드라이브=mnt/gttt,내 드라이브=mnt/gddd' , 'Windows - 팀 드라이브=T:\\팀 드라이브,내 드라이브=Q:']) }}
-            <!-- {{ macros.setting_input_text('path1', '', value=arg[''], placeholder='', desc=['']) }}
-            {{ macros.setting_input_text('path2', '', value=arg[''], placeholder='', desc=['']) }}
-            {{ macros.setting_input_text('path3', '', value=arg[''], placeholder='', desc=['']) }}
-            {{ macros.setting_checkbox('use_dht', 'DHT 사용', value=arg['use_dht'], desc=['트래커 없이 마그넷 정보를 받아 오지만 iknowwhatyoudownload에 노출될 수 있습니다. 끄면 실패할 확률이 높아지거나 오래 걸릴 수 있습니다.']) }}
-            {{ macros.setting_checkbox('scrape', 'Scrape 사용', value=arg['scrape'], desc='피어 정보도 받아옵니다. 활성 토렌트인지 확인할 때 유용. 대신 오래 걸림.') }} -->
-            {{ macros.setting_button([['global_setting_save_btn', '저장']]) }}
+            {{ macros.m_hr() }}
+            {{ macros.info_text_go('down_reg_script', '레지스트리 파일 다운로드', value=arg['reg_down_url'], desc=['메모장으로 편집해서 등록하거나 등록후 regedit에서 스크립트위치를 지정할 수 있습니다. 기본값 C:\\']) }}
+            {{ macros.info_text_go('down_ps1_script', '파워쉘 스크립트 다운로드', value=arg['ps1_down_url'], desc=['윈도우 레지스트리에서 지정한 경로에 넣어줍니다. 기본값 대로 등록했다면 C:\\ 에 넣어줍니다.']) }}
         </form>
         {{ macros.m_tab_content_end() }}
 
-        <!-- 트래커 -->
+        <!-- 바로가기 -->
         {{ macros.m_tab_content_start('바로가기', false) }}
         <form id="setting_tracker" name="setting_tracker">
             {{ macros.setting_input_textarea('shortcut', '바로가기 대상 폴더', value=arg['shortcut'], row='10', desc=['바로가기를 생성할 대상 폴더 미리 지정. folderId=이름 형식으로 작성, 줄바꿈으로 구분']) }}
@@ -40,7 +39,7 @@
         </form>
         {{ macros.m_tab_content_end() }}
 
-        <!-- 기타 -->
+        <!-- 이동 -->
         {{ macros.m_tab_content_start('이동', false) }}
         {{ macros.setting_input_textarea('move', '이동 대상 폴더', value=arg['move'], row='10', desc=['파일 또는 폴더를 이동할 때 대상 폴더 미리 지정. folderId=이름 형식으로 작성, 줄바꿈으로 구분']) }}
         {{ macros.m_hr() }}
@@ -54,6 +53,7 @@
 
 <script type="text/javascript">
     var package_name = "{{arg['package_name']}}";
+    // var down_url = window.location.protocol + "//" + window.location.host + "/file/data/custom/gsearch/summer.ps1"
 
     $(document).ready(function() {
 

@@ -85,6 +85,8 @@ def detail(sub):
         ddns = SystemModelSetting.get('ddns')
         arg['json_api'] = '%s/%s/api/json' % (ddns, package_name)
         arg['m2t_api'] = '%s/%s/api/m2t' % (ddns, package_name)
+        arg['ps1_down_url'] = ddns + "/file/data/custom/gsearch/summer.ps1"
+        arg['reg_down_url'] = ddns + "/file/data/custom/gsearch/gsearch.reg"
         if SystemModelSetting.get_bool('auth_use_apikey'):
             arg['json_api'] += '?apikey=%s' % SystemModelSetting.get('auth_apikey')
             arg['m2t_api'] += '?apikey=%s' % SystemModelSetting.get('auth_apikey')
@@ -118,112 +120,6 @@ def ajax(sub):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-    elif sub == 'install':
-        try:
-            ret = Logic.install()
-            return jsonify(ret)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-    elif sub == 'is_installed':
-        try:
-            is_installed = Logic.is_installed()
-            if is_installed:
-                ret = {'installed': True, 'version': is_installed}
-            else:
-                ret = {'installed': False}
-            return jsonify(ret)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-    elif sub == 'uninstall':
-        try:
-            ret = Logic.uninstall()
-            return jsonify(ret)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-    elif sub == 'cache':
-        try:
-            p = request.form.to_dict() if request.method == 'POST' else request.args.to_dict()
-            action = p.get('action', '')
-            infohash = p.get('infohash', '')
-            name = p.get('name', '')
-            if action == 'clear':
-                Logic.torrent_cache.clear()
-            elif action == 'delete' and infohash:
-                for h in infohash.split(','):
-                    if h and h in Logic.torrent_cache:
-                        del Logic.torrent_cache[h]
-            # filtering
-            if name:
-                info = [val['info'] for _, val in Logic.torrent_cache.iteritems() if name.strip() in val['info']['name']]
-            elif infohash:
-                info = [Logic.torrent_cache[h]['info'] for h in infohash.split(',') if h and h in Logic.torrent_cache]
-            else:
-                info = [val['info'] for _, val in Logic.torrent_cache.iteritems()]
-            info = sorted(info, key=lambda x: x['creation_date'], reverse=True)
-            total = len(info)
-            if p.get('c', ''):
-                counter = int(p.get('c'))
-                pagesize = ModelSetting.get_int('list_pagesize')
-                if counter == 0:
-                    info = info[:pagesize]
-                elif counter == len(info):
-                    info = []
-                else:
-                    info = info[counter:counter+pagesize]
-            # return
-            if action == 'list':
-                return jsonify({'success': True, 'info': info, 'total': total})
-            else:
-                return jsonify({'success': True, 'count': len(info)})
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return jsonify({'success': False, 'log': str(e)})
-    elif sub == 'tracker_update':
-        try:
-            Logic.update_tracker()
-            return jsonify({'success': True})
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return jsonify({'success': False, 'log': str(e)})
-    elif sub == 'tracker_save':
-        try:
-            Logic.tracker_save(request)
-            return jsonify({'success': True})
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return jsonify({'success': False, 'log': str(e)})
-    elif sub == 'torrent_info':
-        # for global use - default arguments by function itself
-        try:
-            from torrent_info import Logic as TorrentInfoLogic
-            data = request.form['hash']
-            logger.debug(data)
-            if data.startswith('magnet'):
-                ret = TorrentInfoLogic.parse_magnet_uri(data)
-            else:
-                ret = TorrentInfoLogic.parse_torrent_url(data)
-            return jsonify(ret)
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-    elif sub == 'get_torrent_info':
-        # for local use - default arguments from user db
-        try:
-            if request.form['uri_url'].startswith('magnet'):
-                torrent_info = Logic.parse_magnet_uri(request.form['uri_url'])
-            else:
-                torrent_info = Logic.parse_torrent_url(request.form['uri_url'])
-            return jsonify({'success': True, 'info': torrent_info})
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return jsonify({'success': False, 'log': str(e)})
     elif sub == 'gsearch':        
         # for local use - default arguments from user db
         try:            
@@ -253,31 +149,7 @@ def ajax(sub):
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-            return jsonify({'success': False, 'log': str(e)})                    
-    elif sub == 'get_file_info':
-        try:
-            fs = request.files['file']
-            fs.seek(0)
-            torrent_file = fs.read()
-            torrent_info = Logic.parse_torrent_file(torrent_file)
-            return jsonify({'success': True, 'info': torrent_info})
-        except Exception as e:
-            logger.error('Exception:%s', str(e))
-            logger.error(traceback.format_exc())
-            return jsonify({'success': False, 'log': str(e)})
-    elif sub == 'get_torrent_file' and request.method == 'GET':
-        try:
-            data = request.args.to_dict()
-            magnet_uri = data.get('uri', '')
-            if not magnet_uri.startswith('magnet'):
-                magnet_uri = 'magnet:?xt=urn:btih:' + magnet_uri
-            torrent_file, torrent_name = Logic.parse_magnet_uri(magnet_uri, no_cache=True, to_torrent=True)
-            resp = Response(torrent_file)
-            resp.headers['Content-Type'] = 'application/x-bittorrent'
-            resp.headers['Content-Disposition'] = "attachment; filename*=UTF-8''{}".format(quote(torrent_name + '.torrent'))
-            return resp
-        except Exception as e:
-            return jsonify({'success': False, 'log': str(e)})
+            return jsonify({'success': False, 'log': str(e)})    
 
 
 #########################################################
