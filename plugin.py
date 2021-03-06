@@ -47,9 +47,9 @@ plugin_info = {
     "name": "gsearch",
     "home": "https://github.com/8ei/gsearch",
     "more": "https://github.com/8ei/gsearch",
-    "description": "구글 드라이브 검색 및 파일관리",
+    "description": "토렌트 마그넷/파일 정보를 보여주는 플러그인",
     "developer": "summer",
-    "zip": "https://github.com/8ei/gsearch/archive/main.zip"
+    "zip": "https://github.com/8ei/gsearch/archive/master.zip"
 }
 #########################################################
 
