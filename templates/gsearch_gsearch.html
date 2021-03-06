@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% block content %}
+ 
+<div>
+  <form id="form_search" class="form-inline" style="text-align:left">
+    <div class="container-fluid">
+      <div class="row show-grid">
+        <span class="col-md-6.1">
+          <select id="order1" name="order1" class="form-control form-control-sm">
+            <option value="name_natural">파일명 - 오름차순</option>
+            <option value="name_natural desc">파일명 - 내림차순</option>
+            <option value="quotaBytesUsed">크기 - 오름차순</option>
+            <option value="quotaBytesUsed desc">크기 - 내림차순</option>
+            <option value="modifiedTime">변경시간 - 오름차순</option>
+            <option value="modifiedTime desc">변경시간 - 내림차순</option>
+          </select>
+          <select id="order2" name="order2" class="form-control form-control-sm">
+            <option value="name_natural">파일명 - 오름차순</option>
+            <option value="name_natural desc">파일명 - 내림차순</option>
+            <option value="quotaBytesUsed">크기 - 오름차순</option>
+            <option value="quotaBytesUsed desc">크기 - 내림차순</option>
+            <option value="modifiedTime">변경시간 - 오름차순</option>
+            <option value="modifiedTime desc">변경시간 - 내림차순</option>
+          </select>
+          <select id="order3" name="order3" class="form-control form-control-sm">
+            <option value="folder">폴더 먼저</option>
+            <option value="folder desc">파일 먼저</option>
+          </select>
+          <select id="pageSize" name="pageSize" class="form-control form-control-sm">
+            <option value="100">검색 단위</option>
+            <option value="100">100건</option>
+            <option value="200">200건</option>
+            <option value="300">300건</option>
+            <option value="500">500건</option>
+            <option value="1000">1000건</option>
+          </select>
+        </span>
+        <span class="col-md-6">
+          <input id="words" name="words" class="form-control form-control-sm w-75" type="text" placeholder="" aria-label="Search">
+          <!-- 검색버턴 -->
+          <button id="search" class="btn btn-sm btn-outline-success">검색</button>
+          <button id="search_fullPath" class="btn btn-sm btn-outline-success">경로 검색</button>
+        </span>
+      </div>
+    </div>
+  </form>
+  <div id='page1'></div>
+  {{ macros.m_hr_head_top() }}
+  {{ macros.m_row_start('0') }}
+  {{ macros.m_col(1,  macros.m_strong(' ')) }}  
+  {{ macros.m_col(6,  macros.m_strong('Filename')) }}  
+  {{ macros.m_col(1,  macros.m_strong('Info')) }}
+  <div class="col-sm-4" style="text-align:right; word-break:break-all;"><strong id="total"> </strong></div>
+  <!-- {{ macros.m_col(4,  macros.m_strong(' '), align='right') }} -->
+  {{ macros.m_row_end() }}
+  {{ macros.m_hr_head_bottom() }}
+  <div id="list_div"></div>
+  <div id='page2'></div>  
+</div>
+
+<style>
+  /* 너비가 560px 이상인 경우의 스타일 */
+  @media(min-width:576px){
+    .scale {
+      transform: scale(1);
+      -webkit-transform: scale(1);
+      -moz-transform: scale(1);
+      -ms-transform: scale(1);
+      -o-transform: scale(1);
+      transition: all 0.1s ease-in-out;   /* 부드러운 모션을 위해 추가*/
+    }
+    .scale:hover {
+      z-index: 1000 !important;
+      transform: scale(2.5);
+      -webkit-transform: scale(2.5);
+      -moz-transform: scale(2.5);
+      -ms-transform: scale(2.5);
+      -o-transform: scale(2.5);
+    }
+    img[class = scale] {
+      width: 136%;    
+    }
+  }
+  span[dupe = true] {
+    color: red;
+  }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js"></script>
+
+<script>
+  $(document).ready(function(){
+
+      var clipboard = new Clipboard('.btn');
+      clipboard.on('success', function(e) {
+          console.log("Success");
+
+          /*
+          아래 함수를 통해서 블록지정을 없앨 수 있습니다.
+          */
+          var selection = window.getSelection();
+          selection.removeAllRanges();
+      });
+      clipboard.on('error', function(e) {
+          console.log("Fail");
+      });
+
+      // 아래와 같이 button 태그만 가져오는 방법도 가능하다.
+      /*
+      var btns = document.querySelectorAll('button');
+      var clipboard = new Clipboard(btns);
+      */
+  });
+</script>
+
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name']}}";
+var sub = "{{arg['sub']}}";
+var current_data = null;
+var user_last_list_option = "{{arg['user_last_list_option']}}";
+
+$(document).ready(function(){
+  // tmp = user_last_list_option.split('|');
+  // if (tmp.length == 5) {
+    document.getElementById("order1").value = "name_natural";
+    document.getElementById("order2").value = "modifiedTime desc";
+    document.getElementById("order3").value = "folder";
+    document.getElementById("words").value = "";
+    // global_sub_request_search(tmp[4]);
+  // } else {
+    // global_sub_request_search('1');
+});
+
+$("body").on('click', '#search', function(e) {
+        e.preventDefault();
+        if (!document.getElementById("words").value) {
+            $.notify('<strong>검색어를 입력하세요!</strong>', {
+                type: 'warning'
+            });
+            return;
+        } else {
+            words = document.getElementById("words").value            
+            order1 = document.getElementById("order1").value
+            order2 = document.getElementById("order2").value
+            order3 = document.getElementById("order3").value
+            pageSize = document.getElementById("pageSize").value
+            gsearch(words, order1, order2, order3, pageSize);    
+        }        
+});
+
+function gsearch(words, order1, order2, order3, pageSize) {
+    $.ajax({
+        url: '/' + package_name + '/ajax/gsearch',
+        type: "POST",
+        cache: false,
+        data: {
+            words: words,
+            path: "noPath",
+            order1: order1,
+            order2: order2,
+            order3: order3,
+            pageSize: pageSize
+        },
+        dataType: "json",
+        success: function(data) {
+            if (data.success) {
+              console.log(data)
+              make_list(data.list)
+              // make_page_html(data.paging)
+            } else {
+                $.notify('<strong>실패하였습니다!!!</strong><br>' + data.log, {
+                    type: 'warning'
+                });
+            }
+        }
+    });
+}
+
+$("body").on('click', '#search_fullPath', function(e) {
+        e.preventDefault();
+        if (!document.getElementById("words").value) {
+            $.notify('<strong>검색어를 입력하세요!</strong>', {
+                type: 'warning'
+            });
+            return;
+        } else {
+            words = document.getElementById("words").value
+            order1 = document.getElementById("order1").value
+            order2 = document.getElementById("order2").value
+            order3 = document.getElementById("order3").value
+            pageSize = document.getElementById("pageSize").value
+            search_fullPath(words, order1, order2, order3, pageSize);    
+        }        
+});
+
+function search_fullPath(words, order1, order2, order3, pageSize) {
+    $.ajax({
+        url: '/' + package_name + '/ajax/gsearch',
+        type: "POST",
+        cache: false,
+        data: {
+            words: words,
+            path: "fullPath",
+            order1: order1,
+            order2: order2,
+            order3: order3,
+            pageSize: pageSize
+        },
+        dataType: "json",
+        success: function(data) {
+            if (data.success) {
+              console.log(data)
+              make_list(data.list)
+              // make_page_html(data.paging)
+            } else {
+                $.notify('<strong>실패하였습니다!!!</strong><br>' + data.log, {
+                    type: 'warning'
+                });
+            }
+        }
+    });
+}
+
+
+
+$("body").on('click', '#gdelete', function(e) {
+        e.preventDefault();        
+        fileId = $(this).data('id');
+        name = $(this).data('name');
+        $.ajax({
+        url: '/' + package_name + '/ajax/gdelete',
+        type: "POST",
+        cache: false,
+        data: {
+            fileId: fileId
+        },
+        dataType: "json",
+        success: function(data) {
+            if (data.success) {
+                console.log(data)                
+                $.notify(name + '포함 ' + data.list[1] + ' 개의 파일이' + '<br><strong>삭제 됐습니다.</strong>')
+            } else {
+                $.notify('<strong>실패하였습니다!!!</strong><br>' + data.log, {
+                    type: 'warning'
+                });
+            }
+        }
+    });
+});
+
+$("body").on('click', '#page', function(e){
+  e.preventDefault();
+  global_sub_request_search($(this).data('page'));
+});
+
+function make_list(data) {
+  console.log(data)
+  str = '';
+  fileIds = '';
+  count = 0
+  for (i in data) {
+    // if(data[i].driveId !== "0AL04BC_pmSXiUk9PVA") {
+    if(data[i].sjva !== true) {
+    fileIds += " " + data[i].id
+    count = count + 1
+    str += m_row_start();    
+    // if (data[i].thumbnailLink !== undefined) {
+    //   str += m_col(1, '<img src="' + data[i].thumbnailLink + '" width=100%>')
+    // };
+    // if (data[i].thumbnailLink !== undefined) {
+    //   tmp = '<img src="' + data[i].thumbnailLink + '" width=100%>'
+    // }
+    if (data[i].thumbnailLink !== undefined) {
+      tmp = '<img class="scale" src="' + data[i].thumbnailLink + '" style="position: relative;">'
+    } else{tmp = '<img src="' + data[i].iconLink + '" width=50px>'}
+    str += m_col(1, tmp);
+    //tmp = (data[i].status == 'completed') ? '완료' : '미완료';
+    tmp = '파일명 : ' + data[i].name;    
+    tmp += '<br>크기 : ' + humanFileSize(data[i].size);
+    tmp += '<br>변경시간 : ' + data[i].modifiedTime;
+    tmp += '<br>GD 경로 : ' + data[i].fullPath;
+    if (data[i].dupe == true) {
+      tmp += '<br><span dupe=' + data[i].dupe + '>MD5 : ' + data[i].md5Checksum + ' - 중복파일</span>';
+    }else {
+      tmp += '<br><span dupe=' + data[i].dupe + '>MD5 : ' + data[i].md5Checksum
+    }
+    
+    // tmp += '<br>내 소유 : ' + data[i].owners[0].me;
+    // tmp += '<br>eMail : ' + data[i].owners[0].emailAddress;
+    // tmp2 = m_button('global_link_btn', 'GD 열기', [{'key':'url', 'value':'https://drive.google.com/drive/u/1/folders/' + data[i].id}]);
+    if (data[i].mimeType == "application/vnd.google-apps.folder") {
+      tmp2 = '<button id="global_link_btn" class="btn btn-sm btn-outline-success"' + 'data-url=https://drive.google.com/drive/u/1/folders/' + data[i].id + '>GD 열기</button>';
+    } else {
+      tmp2 = '<button id="global_link_btn" class="btn btn-sm btn-outline-success"' + 'data-url=https://drive.google.com/drive/u/1/folders/' + data[i].parents + '>GD 열기</button>';
+    }
+    
+    if (data[i].mimeType !== "application/vnd.google-apps.folder" && data[i].fullPath !== "") {
+      name2 = data[i].name.replaceAll("(" , "zzzzzxxxxxzzzzzxxxxx")
+      name2 = name2.replaceAll(")" , "xxxxxzzzzzxxxxxzzzzz")
+      name2 = name2.replaceAll("+" , "xxxxxzzzzzxxxxxccccc")
+      tmp2 += m_button('global_link_btn', '팟플레이어 재생', [{'key':'url', 'value':'summer:p|' + data[i].win_path2 + name2 }]);
+      tmp2 += m_button('global_link_btn', '팟플레이어 추가', [{'key':'url', 'value':'summer:pa|' + data[i].win_path2 + name2 }]);
+      tmp2 += m_button('global_link_btn', '탐색기 열기', [{'key':'url', 'value':'summer:fe|' + data[i].win_path2 + name2 }]);
+    } else if (data[i].fullPath !== "") {
+      tmp2 += m_button('global_link_btn', '팟플레이어 재생', [{'key':'url', 'value':'summer:p|' + data[i].win_path2 }]);
+      tmp2 += m_button('global_link_btn', '팟플레이어 추가', [{'key':'url', 'value':'summer:pa|' + data[i].win_path2 }]);
+      tmp2 += m_button('global_link_btn', '탐색기 열기', [{'key':'url', 'value':'summer:fe|' + data[i].win_path2 }]);
+    }  
+    // tmp2 += m_button('global_link_btn', '탐색기 열기', [{'key':'url', 'value':'summer:t:\\' + data[i].fullPath.replaceAll("/","\\") }]);
+    tmp2 += '<button id="gdelete" class="btn btn-sm btn-outline-danger"' + 'data-id=' + data[i].id + ' data-name=' + data[i].name + '>삭제</button>';
+    tmp += '<br>' + m_button_group(tmp2)
+    str += m_col(6, tmp);
+
+    // tmp = '타입 : ' + data[i].parents;
+    // tmp += '<br>서브타입 : ' + data[i].id;
+    // tmp += '<br>이름 : ' + data[i].id;
+    // tmp += '<br>리모트 : ' + data[i].id;
+    // str += m_col(3, tmp);
+
+        
+    // if (data[i].request_time != null) tmp += '<br>' + data[i].request_time + '(서버 복사 요청)';
+    // if (data[i].clone_completed_time != null) tmp += '<br>' + data[i].clone_completed_time + '(서버 복사 완료)';
+    // if (data[i].completed_time != null) tmp += '<br>' + data[i].completed_time + '(내 리모트 이동 완료)';
+
+    tmp = '<strong>파일ID</strong> : ' + data[i].id;
+    tmp += '<br><strong>폴더ID</strong> : ' + data[i].parents;
+    // tmp += '<br><strong>Plex 경로</strong> : ' + '/mnt/gd/' + data[i].fullPath;
+    // tmp += '<br><strong>window 경로</strong> : ' + data[i].fullPath.replaceAll("/","\\");
+    tmp += '<br><strong>Plex 경로</strong> : ' + data[i].plex_path;
+    tmp += '<br><strong>window 경로</strong> : ' + data[i].win_path;    
+    tmp2 = m_button('global_json_btn', '경로 가져오기', [{'key':'id', 'value':data[i].id}]);    
+    tmp2 += '<button id="copy_plex_path" class="btn btn-sm btn-outline-success" data-clipboard-text="' + data[i].plex_path + '">Plex 경로 복사</button>';
+    tmp2 += '<button id="copy_wPath" class="btn btn-sm btn-outline-success" data-clipboard-text="' + data[i].win_path + '">윈도우 경로 복사</button>';
+    // tmp2 += '<button id="copy_wPath" class="btn btn-sm btn-outline-success" data-clipboard-text="t:\\' + data[i].fullPath.replaceAll("/","\\") + '">윈도우 경로 복사</button>';
+    tmp += '<br>' + m_button_group(tmp2)
+    str += m_col(5, tmp)
+    str += m_row_end();
+    // if (i != data.length -1) str += m_hr();
+    str += m_hr();
+}}
+    
+  str += m_row_start();
+  tmp2 = '<button id="gdelete" class="btn btn-sm btn-outline-danger"' + 'data-id="' + fileIds + '" data-name=전체 파일>전체 삭제</button>';
+  tmp = '<br>' + m_button_group(tmp2)
+  str += m_col(10, tmp);
+
+  document.getElementById("list_div").innerHTML = str;  
+  document.getElementById("total").textContent = '검색 건수: ' + count + '(' + data.length + ')'
+}
+
+
+$("body").on('click', '#reset_btn', function(e){
+  e.preventDefault();
+  document.getElementById("order").value = 'desc';
+  document.getElementById("option1").value = 'noPath';
+  document.getElementById("option2").value = 'all';
+  document.getElementById("words").value = '';
+  // global_sub_request_search('1')
+});
+
+
+// $("body").on('change', '#option1', function(e){
+//   global_sub_request_search('1');
+// });
+// $("body").on('change', '#option2', function(e){
+//   global_sub_request_search('1');
+// });
+// $("body").on('change', '#order', function(e){
+//   global_sub_request_search('1');
+// });
+
+
+</script>
+{% endblock %}
