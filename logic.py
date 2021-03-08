@@ -34,16 +34,71 @@ from .plugin import logger, package_name
 from .model import ModelSetting, db_file
 
 try:
-    import google_oauth # 구글 드라이브 인증
-    service = google_oauth.service # 구글 드라이브 인증
+    # import google_oauth # 구글 드라이브 인증
+    # service = google_oauth.service # 구글 드라이브 인증
+    # page_token = None # 구글 드라이브 인증
+    
+    google_oauth() # 구글 드라이브 인증
     page_token = None # 구글 드라이브 인증
-
+    
 except:
     logger.debug("google_oauth.py import error")
         
 sys.path.append('/usr/lib/python2.7/site-packages')
 
 #########################################################
+
+def google_oauth():
+    if locals().get('service') is None:
+        try:
+            import pickle
+            import os.path, sys
+            from googleapiclient.discovery import build
+            from google_auth_oauthlib.flow import InstalledAppFlow
+            from google.auth.transport.requests import Request
+
+            from .model import ModelSetting, db_file
+
+            cred_path = ModelSetting.get('cred_path1')
+            token_pickle = cred_path + "/token.pickle"
+            credentials_json = cred_path + "/credentials.json"
+
+            token_pickle = token_pickle.replace("//" , "/")
+            credentials_json = credentials_json.replace("//" , "/") 
+
+            # @staticmethod
+            # def oauth():
+
+            SCOPES = ['https://www.googleapis.com/auth/drive']
+            # print(locals(creds))
+
+            # print(locals(creds))
+            # global creds, token, service
+            creds = None
+
+            if os.path.exists(token_pickle):            
+                with open(token_pickle, 'rb') as token:
+                    creds = pickle.load(token)
+
+            # If there are no (valid) credentials available, let the user log in.
+            if not creds or not creds.valid:
+                if creds and creds.expired and creds.refresh_token:
+                    creds.refresh(Request())
+                else:
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        credentials_json, SCOPES)
+                    creds = flow.run_local_server(port=0)
+                # Save the credentials for the next run
+                with open(token_pickle, 'wb') as token:
+                    pickle.dump(creds, token)
+
+            global service, page_token
+            service = build('drive', 'v3', credentials=creds)
+            page_token = None
+        except:
+            logger.debug("===================== 인증 파일 로드 실패")
+
+
 
 
 def pathscrub(dirty_path, os=None, filename=False):
@@ -177,6 +232,16 @@ class Logic(object):
             logger.error(traceback.format_exc())
 
     @staticmethod
+    def oauth():
+        # logger.debug(google_oauth.service)
+        try:
+            global service
+            service = None
+            return True
+        except:
+            logger.debug("================= google_oauth.py import error")            
+
+    @staticmethod
     def setting_save(req):
         try:
             for key, value in req.form.items():
@@ -270,6 +335,14 @@ class Logic(object):
 
     @staticmethod
     def gsearch(words, path_option, order1, order2, order3, pageSize):
+        global service
+        try:
+            if locals().get('service') is None:
+                google_oauth()
+        except:
+            logger.debug("인증관련 설정에 문제가 있습니다.")
+            return
+
         start_time = time.time()  # 작업 소요시간 측정을 위한 시작 시간 저장
         words = words.strip()
         query = ""
