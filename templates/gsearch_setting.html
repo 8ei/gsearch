@@ -15,9 +15,9 @@
         <form id="setting" name="setting">
             {{ macros.setting_button([['global_setting_save_btn', '설정 저장']]) }}
             {{ macros.m_hr() }}
-            {{ macros.info_text_go('instruction', '중요!!', desc=['[SJVA 임시 저장소 driveId]에 임시저장소의 드라이브 ID를 꼭 넣고 사용하세요.', '콤마로 구분해서 여러 개를 등록할 수 있으며 여기에 등록된 드라이브는 검색 결과에 나타나지 않습니다.', '임시 저장소의 데이터를 임의로 수정하거나 삭제하면 안되니 꼭 넣고 사용하세요.']) }}
+            {{ macros.info_text_go('instruction', '중요!!', desc=['[검색제외 드라이브에 ID]에 SJVA 임시 저장소의 드라이브 ID를 꼭 넣고 사용하세요.', '콤마로 구분해서 여러 개를 등록할 수 있으며 여기에 등록된 드라이브는 검색 결과에 나타나지 않습니다.', '임시 저장소의 데이터를 임의로 수정하거나 삭제하면 안되니 꼭 넣고 사용하세요.']) }}
             {{ macros.m_hr() }}
-            {{ macros.setting_input_text('sjva_driveId', 'SJVA 임시 저장소 driveId', value=arg['sjva_driveId'], placeholder='', desc=['구글드라이브 공유 SJVA임시 저장소의 driveId값. (콤마로 구분) 최상위 폴더의 폴더ID와 같습니다.']) }}
+            {{ macros.setting_input_text('sjva_driveId', '검색제외 드라이브 ID', value=arg['sjva_driveId'], placeholder='', desc=['구글드라이브 공유 드라이브의 driveId값. (콤마로 구분) 최상위 폴더의 폴더ID와 같습니다.']) }}
             {{ macros.setting_input_int('path_count', '경로검색 건수', value=arg['path_count'], max='100', placeholder='50', desc='최대 100건') }}
             {{ macros.setting_input_text('plex_path', 'Plex 경로 변환 규칙', value=arg['plex_path'], placeholder='팀 드라이브=mnt/gttt,내 드라이브=mnt/gddd', desc=['\"[구글드라이브 경로]=[로컬 마운트 경로]\"형식으로 작성합니다. 예) 내 드라이브=mnt/gd']) }}
             {{ macros.setting_input_text('win_path', 'Windows 경로 변환 규칙', value=arg['win_path'], placeholder='팀 드라이브=T:\\팀 드라이브,내 드라이브=Q:', desc=['\"[구글드라이브 경로]=[Windows 경로]\"형식으로 작성합니다.','예) \"공유용=t:\\공유용\" - \"공유용\" 이라는 공드가 윈도우에 "T:\\공유용"에 마운트 된 상태']) }}
