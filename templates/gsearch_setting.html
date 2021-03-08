@@ -33,7 +33,7 @@
             <!-- {{ macros.setting_select_and_buttons('tracker_update_from', '트래커 리스트', arg['tracker_update_from_list'], col='9', desc=['업데이트에 사용할 트래커 리스트를 선택하세요. 출처: https://github.com/ngosang/trackerslist'], value=arg['tracker_update_from']) }}
             {{ macros.setting_input_int('tracker_update_every', '자동 업데이트', value=arg['tracker_update_every'], min='0', placeholder='15', desc='위 리스트로부터 자동으로 받아옵니다. 0이면 업데이트 하지 않음. 주기: 일') }}
             {{ macros.setting_button_with_info([['tracker_update_now_btn', '지금 업데이트']], '수동 업데이트', '최근 업데이트: ' ~ arg['tracker_last_update']) }} -->
-            {{ macros.setting_button([['creds_setting_save_btn', '저장']]) }}
+            {{ macros.setting_button([['111creds_setting_save_btn', '저장']]) }}
         </form>
         {{ macros.m_tab_content_end() }}
 
@@ -70,41 +70,41 @@
     var package_name = "{{arg['package_name']}}";
     // var down_url = window.location.protocol + "//" + window.location.host + "/file/data/custom/gsearch/summer.ps1"
 
-    $(document).ready(function() {
+    // $(document).ready(function() {
 
-        $(function() {
-            $.ajax({
-                url: '/' + package_name + '/ajax/is_installed',
-                type: "POST",
-                cache: false,
-                data: {},
-                dataType: "json",
-                success: function(data) {
-                    if (data.installed) {
-                        $('#install_btn').prop('disabled', true);
-                        $('#install_btn').html('설치됨');
-                        $('#install_btn').parent().next().html('<em>libtorrent ' + data.version + '</em>');
-                    } else {
-                        $('.nav-tabs a[href="#기타"]').tab('show');
-                    }
-                }
-            });
-        });
+    //     $(function() {
+    //         $.ajax({
+    //             url: '/' + package_name + '/ajax/is_installed',
+    //             type: "POST",
+    //             cache: false,
+    //             data: {},
+    //             dataType: "json",
+    //             success: function(data) {
+    //                 if (data.installed) {
+    //                     $('#install_btn').prop('disabled', true);
+    //                     $('#install_btn').html('설치됨');
+    //                     $('#install_btn').parent().next().html('<em>libtorrent ' + data.version + '</em>');
+    //                 } else {
+    //                     $('.nav-tabs a[href="#기타"]').tab('show');
+    //                 }
+    //             }
+    //         });
+    //     });
 
-        $(function() {
-            $.ajax({
-                url: '/' + package_name + '/ajax/cache',
-                type: "POST",
-                cache: false,
-                data: {},
-                dataType: "json",
-                success: function(data) {
-                    update_cache_status(data);
-                }
-            });
-        });
+    //     $(function() {
+    //         $.ajax({
+    //             url: '/' + package_name + '/ajax/cache',
+    //             type: "POST",
+    //             cache: false,
+    //             data: {},
+    //             dataType: "json",
+    //             success: function(data) {
+    //                 update_cache_status(data);
+    //             }
+    //         });
+    //     });
 
-    });
+    // });
 
     // libtorrent 설치 버튼
     $("body").on('click', '#install_btn', function(e) {
@@ -218,6 +218,25 @@ $("body").on('click', '#uninstall_btn', function(e) {
                     });
                 } else {
                     $.notify('<strong>설정 저장에 실패하였습니다.</strong><br>' + data.log, {
+                        type: 'warning'
+                    });
+                }
+            }
+        });
+        $.ajax({
+            url: '/' + package_name + '/ajax/oauth',
+            type: "POST",
+            cache: false,
+            dataType: "json",
+            data: {},
+            success: function(data) {
+                console.log(data)
+                if (data) {
+                    $.notify('<strong>인증정보를 다시 로드합니다.</strong>', {
+                        type: 'success'
+                    });
+                } else {
+                    $.notify('<strong>인증정보 로드에 실패했습니다..</strong><br>' + data.log, {
                         type: 'warning'
                     });
                 }
