@@ -7,6 +7,15 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+from .model import ModelSetting, db_file
+
+cred_path = ModelSetting.get('cred_path1')
+token_pickle = cred_path + "/token.pickle"
+credentials_json = cred_path + "/credentials.json"
+
+token_pickle = token_pickle.replace("//" , "/")
+credentials_json = credentials_json.replace("//" , "/") 
+
 # @staticmethod
 # def oauth():
 
@@ -17,8 +26,8 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 # global creds, token, service
 creds = None
 
-if os.path.exists('/app/data/rclone_expand/token.pickle'):            
-    with open('/app/data/rclone_expand/token.pickle', 'rb') as token:
+if os.path.exists(token_pickle):            
+    with open(token_pickle, 'rb') as token:
         creds = pickle.load(token)
 
 # If there are no (valid) credentials available, let the user log in.
@@ -27,10 +36,10 @@ if not creds or not creds.valid:
         creds.refresh(Request())
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
-            '/app/data/rclone_expand/credentials.json', SCOPES)
+            credentials_json, SCOPES)
         creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
-    with open('/app/data/rclone_expand/token.pickle', 'wb') as token:
+    with open(token_pickle, 'wb') as token:
         pickle.dump(creds, token)
 
 
@@ -38,4 +47,5 @@ service = build('drive', 'v3', credentials=creds)
 page_token = None
 
 # return(creds, token, service)
+
 

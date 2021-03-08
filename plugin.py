@@ -120,6 +120,13 @@ def ajax(sub):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
+    elif sub == 'creds_save':
+        try:
+            ret = Logic.creds_save(request)
+            return jsonify(ret)
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())            
     elif sub == 'gsearch':        
         # for local use - default arguments from user db
         try:            

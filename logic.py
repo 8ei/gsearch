@@ -32,12 +32,16 @@ from framework.util import Util
 # 패키지
 from .plugin import logger, package_name
 from .model import ModelSetting, db_file
-import google_oauth # 구글 드라이브 인증
+
+try:
+    import google_oauth # 구글 드라이브 인증
+    service = google_oauth.service # 구글 드라이브 인증
+    page_token = None # 구글 드라이브 인증
+
+except:
+    logger.debug("google_oauth.py import error")
         
 sys.path.append('/usr/lib/python2.7/site-packages')
-
-service = google_oauth.service # 구글 드라이브 인증
-page_token = None # 구글 드라이브 인증
 
 #########################################################
 
@@ -117,7 +121,10 @@ class Logic(object):
         'tracker_update_from': 'best',
         'libtorrent_build': '191217',
         'http_proxy': '',
-        'list_pagesize': '20'
+        'list_pagesize': '20',
+        'cred_path1': '/app/data/rclone_expand',
+        'cred_path2': '',
+        'cred_path3': ''
     }
 
     torrent_cache = None
@@ -194,15 +201,18 @@ class Logic(object):
             )
 
     @staticmethod
-    def tracker_save(req):
-        for key, value in req.form.items():
-            logger.debug({'key': key, 'value': value})
-            if key == 'trackers':
-                value = json.dumps(value.split('\n'))
-            logger.debug('Key:%s Value:%s', key, value)
-            entity = db.session.query(ModelSetting).filter_by(key=key).with_for_update().first()
-            entity.value = value
-        db.session.commit()
+    def creds_save(req):
+        try:
+            for key, value in req.form.items():
+                logger.debug('Key:%s Value:%s', key, value)
+                entity = db.session.query(ModelSetting).filter_by(key=key).with_for_update().first()
+                entity.value = value
+            db.session.commit()
+            return True
+        except Exception as e:
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            return False
 
     @staticmethod
     def update_tracker():

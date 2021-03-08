@@ -329,8 +329,8 @@ function make_list(data) {
     // tmp += '<br><strong>window 경로</strong> : ' + data[i].fullPath.replaceAll("/","\\");
     tmp += '<br><strong>Plex 경로</strong> : ' + data[i].plex_path;
     tmp += '<br><strong>window 경로</strong> : ' + data[i].win_path;    
-    //tmp2 = m_button('global_json_btn', '경로 가져오기', [{'key':'id', 'value':data[i].id}]);    
-    tmp2 = '<button id="copy_plex_path" class="btn btn-sm btn-outline-success" data-clipboard-text="' + data[i].plex_path + '">Plex 경로 복사</button>';
+    tmp2 = m_button('global_json_btn', '경로 가져오기', [{'key':'id', 'value':data[i].id}]);    
+    tmp2 += '<button id="copy_plex_path" class="btn btn-sm btn-outline-success" data-clipboard-text="' + data[i].plex_path + '">Plex 경로 복사</button>';
     tmp2 += '<button id="copy_wPath" class="btn btn-sm btn-outline-success" data-clipboard-text="' + data[i].win_path + '">윈도우 경로 복사</button>';
     // tmp2 += '<button id="copy_wPath" class="btn btn-sm btn-outline-success" data-clipboard-text="t:\\' + data[i].fullPath.replaceAll("/","\\") + '">윈도우 경로 복사</button>';
     tmp += '<br>' + m_button_group(tmp2)

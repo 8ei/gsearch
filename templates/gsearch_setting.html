@@ -6,6 +6,7 @@
             {{ macros.m_tab_head('일반', true) }} 
             {{ macros.m_tab_head('바로가기', false) }} 
             {{ macros.m_tab_head('이동', false) }} 
+            {{ macros.m_tab_head('인증', false) }} 
         {{ macros.m_tab_head_end() }}
     </nav>
     <div class="tab-content mb-3" id="nav-tabContent">
@@ -22,9 +23,6 @@
             {{ macros.setting_input_text('win_path', 'Windows 경로 변환 규칙', value=arg['win_path'], placeholder='팀 드라이브=T:\\팀 드라이브,내 드라이브=Q:', desc=['\"[구글드라이브 경로]=[Windows 경로]\"형식으로 작성합니다.','예) \"공유용=t:\\공유용\" - \"공유용\" 이라는 공드가 윈도우에 "T:\\공유용"에 마운트 된 상태']) }}
             {{ macros.m_hr() }}
             {{ macros.info_text_go('instruction', '변환 규칙', desc=['단순 치환규칙으로 생각하면 쉽습니다.', '구글드라이브 경로는 플러그인에서 검색된 것을 기준으로 합니다.', '콤마로 구분하여 여러개를 등록할 수 있습니다.', '예시)' , 'Plex(linux) - 팀 드라이브=mnt/gttt,내 드라이브=mnt/gddd' , 'Windows - 팀 드라이브=T:\\팀 드라이브,내 드라이브=Q:']) }}
-            {{ macros.m_hr() }}
-            {{ macros.info_text_go('down_reg_script', '레지스트리 파일 다운로드', value=arg['reg_down_url'], desc=['메모장으로 편집해서 등록하거나 등록후 regedit에서 스크립트위치를 지정할 수 있습니다. 기본값 C:\\']) }}
-            {{ macros.info_text_go('down_ps1_script', '파워쉘 스크립트 다운로드', value=arg['ps1_down_url'], desc=['윈도우 레지스트리에서 지정한 경로에 넣어줍니다. 기본값 대로 등록했다면 C:\\ 에 넣어줍니다.']) }}
         </form>
         {{ macros.m_tab_content_end() }}
 
@@ -35,7 +33,7 @@
             <!-- {{ macros.setting_select_and_buttons('tracker_update_from', '트래커 리스트', arg['tracker_update_from_list'], col='9', desc=['업데이트에 사용할 트래커 리스트를 선택하세요. 출처: https://github.com/ngosang/trackerslist'], value=arg['tracker_update_from']) }}
             {{ macros.setting_input_int('tracker_update_every', '자동 업데이트', value=arg['tracker_update_every'], min='0', placeholder='15', desc='위 리스트로부터 자동으로 받아옵니다. 0이면 업데이트 하지 않음. 주기: 일') }}
             {{ macros.setting_button_with_info([['tracker_update_now_btn', '지금 업데이트']], '수동 업데이트', '최근 업데이트: ' ~ arg['tracker_last_update']) }} -->
-            {{ macros.setting_button([['tracker_setting_save_btn', '저장']]) }}
+            {{ macros.setting_button([['creds_setting_save_btn', '저장']]) }}
         </form>
         {{ macros.m_tab_content_end() }}
 
@@ -44,6 +42,23 @@
         {{ macros.setting_input_textarea('move', '이동 대상 폴더', value=arg['move'], row='10', desc=['파일 또는 폴더를 이동할 때 대상 폴더 미리 지정. folderId=이름 형식으로 작성, 줄바꿈으로 구분']) }}
         {{ macros.m_hr() }}
         {{ macros.m_tab_content_end() }}
+
+        <!-- 일반 -->
+        {{ macros.m_tab_content_start('인증', true) }}
+        <form id="creds_setting" name="creds_setting">
+            {{ macros.setting_button([['creds_setting_save_btn', '저장']]) }}
+            <!-- {{ macros.m_hr() }}
+            {{ macros.info_text_go('instruction', '참고', desc=['인증 파일 경로1은 무조건 입력하셔야 합니다.' , '현재 경로2, 경로3은 사용하지 않습니다.']) }} -->
+            {{ macros.m_hr() }}
+            {{ macros.setting_input_text('cred_path1', '인증 파일 경로1(필수)', value=arg['cred_path1'], placeholder='/app/data/rclone_expand', desc=['구글API 인증시 생성되는 credentials파일과 token.pickle 파일의 경로를 지정합니다.' , 'rclone_expand에서 사용하는 인증파일을 똑같이 사용하시려면  /app/data/rclone_expand 를 입력하세요','rclone_expand에서 사용하는 계정과 다른 계정으로 사용하는 경우 따로 폴더를 만들어서 지정합니다.' , '예) /app/data/rclone_expand/cred1']) }}
+            <!-- {{ macros.setting_input_text('cred_path2', '인증 파일 경로2', value=arg['cred_path2'], placeholder='/app/data/rclone_expand/cred2') }}
+            {{ macros.setting_input_text('cred_path3', '인증 파일 경로3', value=arg['cred_path3'], placeholder='/app/data/rclone_expand/cred3') }} -->
+            {{ macros.m_hr() }}
+            {{ macros.info_text_go('down_reg_script', '레지스트리 파일 다운로드', value=arg['reg_down_url'], desc=['메모장으로 편집해서 등록하거나 등록후 regedit에서 스크립트위치를 지정할 수 있습니다. 기본값 C:\\']) }}
+            {{ macros.info_text_go('down_ps1_script', '파워쉘 스크립트 다운로드', value=arg['ps1_down_url'], desc=['윈도우 레지스트리에서 지정한 경로에 넣어줍니다. 기본값 대로 등록했다면 C:\\ 에 넣어줍니다.']) }}
+        </form>
+        {{ macros.m_tab_content_end() }}
+        
     </div>
     <!--tab-content-->
 </div>
@@ -186,17 +201,18 @@ $("body").on('click', '#uninstall_btn', function(e) {
         });
     });
 
-    // tracker_setting_save_btn 버튼
-    $("body").on('click', '#tracker_setting_save_btn', function(e) {
+    // creds_setting_save_btn 버튼
+    $("body").on('click', '#creds_setting_save_btn', function(e) {
         e.preventDefault();
         $.ajax({
-            url: '/' + package_name + '/ajax/tracker_save',
+            url: '/' + package_name + '/ajax/creds_save',
             type: "POST",
             cache: false,
             dataType: "json",
-            data: get_formdata('#setting_tracker'),
+            data: get_formdata('#creds_setting'),
             success: function(data) {
-                if (data.success) {
+                console.log(data)
+                if (data) {
                     $.notify('<strong>설정을 저장하였습니다.</strong>', {
                         type: 'success'
                     });
